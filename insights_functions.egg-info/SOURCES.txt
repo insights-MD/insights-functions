@@ -1,0 +1,17 @@
+README.rst
+setup.py
+insights_functions/__init__.py
+insights_functions/biometrics_insights.py
+insights_functions/cloud_connection.py
+insights_functions/image_insights.py
+insights_functions/main.py
+insights_functions/requirements.txt
+insights_functions/service_account.json
+insights_functions/speech_insights.py
+insights_functions/test.jpg
+insights_functions/test.wav
+insights_functions.egg-info/PKG-INFO
+insights_functions.egg-info/SOURCES.txt
+insights_functions.egg-info/dependency_links.txt
+insights_functions.egg-info/requires.txt
+insights_functions.egg-info/top_level.txt

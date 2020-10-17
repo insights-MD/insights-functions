@@ -1,0 +1,6 @@
+google-cloud
+google-cloud-vision
+google-cloud-firestore
+google-cloud-speech
+google-cloud-language
+grpcio
