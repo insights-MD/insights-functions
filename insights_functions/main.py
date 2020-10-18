@@ -11,7 +11,7 @@ def upload_image(request):
     Request: Multipart Form Request
     """
 
-    user_id = request['userId']
+    user_id = request.form['userId']
     image_file = request.files['image']
     filestream = image_file.stream
     filestream.seek(0)
@@ -34,11 +34,12 @@ def get_speech_insights(request):
     Request: Multipart Form Request
     """
 
+    user_id = request.form['userId']
     wav_file = request.files['audio']
     filestream = wav_file.stream
     filestream.seek(0)
 
-    return analyze_speech(filestream)
+    return analyze_speech(user_id, filestream)
 
 def get_user_data(request):
     """

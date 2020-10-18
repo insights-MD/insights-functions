@@ -1,9 +1,9 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from cloud_connection import speech, language
+from cloud_connection import speech, language, database
 
-def analyze_speech(audio_file):
+def analyze_speech(user_id, audio_file):
     speech_client, RecognitionAudio, RecognitionConfig = speech()
 
     if audio_file is None:
@@ -27,9 +27,29 @@ def analyze_speech(audio_file):
     language_client, document = language(text)
     response = language_client.analyze_entities(document = document, encoding_type = 'UTF32')
 
-    entities = list()
+    entities = set()
+
+    # Get the user's keywords
+    ref = database().collection('biometrics').document(user_id)
+    document = ref.get()
+
+    # If the user exists, update existing records
+    if document.exists:
+        data = document.to_dict()
+        if 'keywords' in data:
+            entities = set(data['keywords'])
+
     for entity in response.entities:
-        entities.append(entity.name)
+        entities.add(entity.name)
+
+    if document.exists:
+        ref.update({
+            'keywords': list(entities)
+        })
+    else:
+        ref.set({
+            'keywords': list(entities)
+        })
 
     return str(entities), 200
 

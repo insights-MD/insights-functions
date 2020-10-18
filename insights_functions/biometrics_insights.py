@@ -25,7 +25,7 @@ def analyze_biometrics(user_id, biometrics):
     for scan in biometrics:
         blood_oxygen.append(int(scan['SPO2']))
         heart_rate.append(int(scan['HR'].split()[0]))
-        temperature.append(int(scan['Temperature'][0]))
+        temperature.append(int(scan['temperature'][0]))
 
     max_seconds = max_window()
     if len(blood_oxygen) > max_seconds:
@@ -63,14 +63,14 @@ if __name__ == '__main__':
             "red": "51249",
             "ir": "31048",
             "SPO2": "96",
-            "Temperature": [ "90", "F" ],
+            "temperature": [ "90", "F" ],
             "HR": "86 B"
         },
         {
             "red": "50824",
             "ir": "31138",
             "SPO2": "95",
-            "Temperature": [ "91", "F" ],
+            "temperature": [ "91", "F" ],
             "HR": "88 B"
         }
     ]
