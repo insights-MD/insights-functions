@@ -54,4 +54,4 @@ def analyze_speech(user_id, audio_file):
     return str(entities), 200
 
 if __name__ == '__main__':
-    print(analyze_speech(None))
+    print(analyze_speech('test_id', None))

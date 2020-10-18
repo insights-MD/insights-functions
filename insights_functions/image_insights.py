@@ -3,6 +3,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from cloud_connection import vision, database, max_window
 import json
+import math
 
 def analyze_image(user_id, image_file):
     if image_file is None:
@@ -15,17 +16,11 @@ def analyze_image(user_id, image_file):
         'content': content
     })
 
-    emotions = {
-        'joy': response.face_annotations[0].joy_likelihood,
-        'sorrow': response.face_annotations[0].sorrow_likelihood,
-        'anger': response.face_annotations[0].anger_likelihood,
-        'surprise': response.face_annotations[0].surprise_likelihood
-    }
-
     joy = list()
     sorrow = list()
     anger = list()
     surprise = list()
+    score = list()
 
     # Get the user's emotions
     ref = database().collection('biometrics').document(user_id)
@@ -42,11 +37,21 @@ def analyze_image(user_id, image_file):
             anger = data['anger']
         if 'surprise' in data:
             surprise = data['surprise']
+        if 'emotional_index_score' in data:
+            score = data['emotional_index_score']
 
-    joy.append(int(response.face_annotations[0].joy_likelihood))
-    sorrow.append(int(response.face_annotations[0].sorrow_likelihood))
-    anger.append(int(response.face_annotations[0].anger_likelihood))
-    surprise.append(int(response.face_annotations[0].surprise_likelihood))
+    joy_score = int(response.face_annotations[0].joy_likelihood)
+    sorrow_score = int(response.face_annotations[0].sorrow_likelihood)
+    anger_score = int(response.face_annotations[0].anger_likelihood)
+    surprise_score = int(response.face_annotations[0].surprise_likelihood)
+
+    EIS = 1 / (1 + math.exp(-1 * ((joy_score - ((sorrow_score + anger_score + surprise_score) / 3)))))
+
+    joy.append(joy_score)
+    sorrow.append(sorrow_score)
+    anger.append(anger_score)
+    surprise.append(surprise_score)
+    score.append(EIS)
 
     max_seconds = max_window()
     if len(joy) > max_seconds:
@@ -61,28 +66,34 @@ def analyze_image(user_id, image_file):
     if len(surprise) > max_seconds:
         surprise = surprise[len(surprise)  - max_seconds:]
 
+    if len(score) > max_seconds:
+        score = score[len(score)  - max_seconds:]
+
     if document.exists:
         ref.update({
             'joy': joy,
             'sorrow': sorrow,
             'anger': anger,
-            'surprise': surprise
+            'surprise': surprise,
+            'emotional_index_score': score
         })
     else:
         ref.set({
             'joy': joy,
             'sorrow': sorrow,
             'anger': anger,
-            'surprise': surprise
-        })   
+            'surprise': surprise,
+            'emotional_index_score': score
+        })
 
     print('Updated emotion data:')
     print(f'Joy Len: {len(joy)}')
     print(f'Sorrow Len: {len(sorrow)}')
     print(f'Anger Len: {len(anger)}')
     print(f'Surprise Len: {len(surprise)}')
+    print(f'Score: {EIS}')
     
-    return json.dumps(emotions), 200
+    return str(EIS), 200
 
 if __name__ == '__main__':
     print(analyze_image('test_id', None))
